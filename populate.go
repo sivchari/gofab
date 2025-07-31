@@ -8,42 +8,36 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 )
 
-// autoPopulateFromTags automatically populates struct fields based on gofab tags
 func autoPopulateFromTags(obj any) {
 	v := reflect.ValueOf(obj)
 	if v.Kind() != reflect.Ptr {
 		return
 	}
-	
+
 	v = v.Elem()
 	if v.Kind() != reflect.Struct {
 		return
 	}
-	
+
 	t := v.Type()
-	
+
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
 		fieldType := t.Field(i)
-		
-		// Skip unexported fields
+
 		if !field.CanSet() {
 			continue
 		}
-		
-		// Get gofab tag
+
 		tag := fieldType.Tag.Get("gofab")
 		if tag == "" {
-			// No tag - leave as zero value
 			continue
 		}
-		
+
 		if tag == "-" {
-			// Skip this field
 			continue
 		}
-		
-		// Generate value based on tag
+
 		value := generateFromTag(tag, field.Type())
 		if value != nil {
 			setFieldValue(field, value)
@@ -51,12 +45,14 @@ func autoPopulateFromTags(obj any) {
 	}
 }
 
-// generateFromTag generates value based on gofab struct tag
 func generateFromTag(tag string, fieldType reflect.Type) any {
-	// Handle parameterized tags (e.g., "range:1,100", "sentence:3")
+	return handleTagGeneration(tag, fieldType)
+}
+
+func handleTagGeneration(tag string, fieldType reflect.Type) any {
 	parts := strings.Split(tag, ":")
 	tagName := parts[0]
-	
+
 	switch tagName {
 	case "name":
 		return gofakeit.Name()
@@ -71,66 +67,84 @@ func generateFromTag(tag string, fieldType reflect.Type) any {
 	case "word":
 		return gofakeit.Word()
 	case "sentence":
-		count := 5 // default
-		if len(parts) == 2 {
-			if c, err := strconv.Atoi(parts[1]); err == nil && c > 0 {
-				count = c
-			}
-		}
-		return gofakeit.Sentence(count)
+		return handleSentenceTag(parts)
 	case "range":
-		if len(parts) == 2 {
-			minMax := strings.Split(parts[1], ",")
-			if len(minMax) == 2 {
-				min, err1 := strconv.Atoi(strings.TrimSpace(minMax[0]))
-				max, err2 := strconv.Atoi(strings.TrimSpace(minMax[1]))
-				if err1 == nil && err2 == nil && min <= max {
-					return gofakeit.Number(min, max)
-				}
-			}
-		}
-		// Fallback for invalid range
-		return gofakeit.Number(1, 100)
+		return handleRangeTag(parts)
 	case "sequence":
-		// Use existing sequence functionality
 		return generateSequence(fieldType)
 	default:
-		// Unknown tag - return nil to leave as zero value
 		return nil
 	}
 }
 
-// sequenceCounters holds global sequence counters for different types
+func handleSentenceTag(parts []string) any {
+	count := 5
+	if len(parts) == 2 {
+		if c, err := strconv.Atoi(parts[1]); err == nil && c > 0 {
+			count = c
+		}
+	}
+
+	return gofakeit.Sentence(count)
+}
+
+func handleRangeTag(parts []string) any {
+	if len(parts) != 2 {
+		return gofakeit.Number(1, 100)
+	}
+
+	minMax := strings.Split(parts[1], ",")
+	if len(minMax) != 2 {
+		return gofakeit.Number(1, 100)
+	}
+
+	minVal, err1 := strconv.Atoi(strings.TrimSpace(minMax[0]))
+	maxVal, err2 := strconv.Atoi(strings.TrimSpace(minMax[1]))
+
+	if err1 == nil && err2 == nil && minVal <= maxVal {
+		return gofakeit.Number(minVal, maxVal)
+	}
+
+	return gofakeit.Number(1, 100)
+}
+
 var sequenceCounters = make(map[reflect.Type]*sequenceCounter)
 
-// generateSequence generates sequential values using existing sequence logic
 func generateSequence(fieldType reflect.Type) any {
 	counter, exists := sequenceCounters[fieldType]
 	if !exists {
 		counter = &sequenceCounter{value: 0}
 		sequenceCounters[fieldType] = counter
 	}
-	
+
 	next := counter.next()
-	
+
 	switch fieldType.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return int(next)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		if next < 0 {
+			return uint(0)
+		}
 		return uint(next)
 	case reflect.String:
 		return strconv.FormatInt(next, 10)
+	case reflect.Bool:
+		return next%2 == 0
+	case reflect.Float32:
+		return float32(next)
+	case reflect.Float64:
+		return float64(next)
 	default:
 		return int(next)
 	}
 }
 
-// setFieldValue safely sets a field value using reflection
 func setFieldValue(field reflect.Value, value any) {
 	if !field.CanSet() {
 		return
 	}
-	
+
 	valueReflect := reflect.ValueOf(value)
 	if valueReflect.Type().ConvertibleTo(field.Type()) {
 		field.Set(valueReflect.Convert(field.Type()))

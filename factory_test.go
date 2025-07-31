@@ -6,20 +6,25 @@ import (
 	"github.com/sivchari/gofab"
 )
 
+const (
+	roleUser  = "user"
+	roleAdmin = "admin"
+)
+
 type IntegratedTestUser struct {
-	ID      int    `gofab:"sequence"`
-	Name    string `gofab:"name"`
-	Email   string `gofab:"email"`
-	Role    string // No tag - will be set by factory defaults
-	Active  bool   `gofab:"-"` // Skip auto-generation
-	NoTag   string             // No tag, no factory default
+	ID     int    `gofab:"sequence"`
+	Name   string `gofab:"name"`
+	Email  string `gofab:"email"`
+	Role   string // No tag - will be set by factory defaults
+	Active bool   `gofab:"-"` // Skip auto-generation
+	NoTag  string // No tag, no factory default
 }
 
 func TestDefineWithAutoGeneration(t *testing.T) {
 	// Create factory with defaults that will be applied after auto-generation
 	userFactory := gofab.Define[IntegratedTestUser](func(u *IntegratedTestUser) {
-		u.Role = "user"  // This will override any auto-generated value
-		u.Active = true  // This will set the skipped field
+		u.Role = roleUser // This will override any auto-generated value
+		u.Active = true   // This will set the skipped field
 	})
 
 	user := userFactory.Build()
@@ -36,7 +41,7 @@ func TestDefineWithAutoGeneration(t *testing.T) {
 	}
 
 	// Check factory defaults
-	if user.Role != "user" {
+	if user.Role != roleUser {
 		t.Errorf("Role should be set by factory default, got %s", user.Role)
 	}
 	if !user.Active {
@@ -51,14 +56,14 @@ func TestDefineWithAutoGeneration(t *testing.T) {
 
 func TestDefineWithOverrides(t *testing.T) {
 	adminFactory := gofab.Define[IntegratedTestUser](func(u *IntegratedTestUser) {
-		u.Role = "admin"
+		u.Role = roleAdmin
 		u.Active = true
 	})
 
 	// Override some fields including auto-generated ones
 	superAdmin := adminFactory.Build(func(u *IntegratedTestUser) {
-		u.Name = "Super Admin"  // Override auto-generated name
-		u.NoTag = "Special"     // Set the untouched field
+		u.Name = "Super Admin" // Override auto-generated name
+		u.NoTag = "Special"    // Set the untouched field
 	})
 
 	// Check that overrides work
@@ -70,7 +75,7 @@ func TestDefineWithOverrides(t *testing.T) {
 	}
 
 	// Check that factory defaults are still applied
-	if superAdmin.Role != "admin" {
+	if superAdmin.Role != roleAdmin {
 		t.Errorf("Role should be set by factory, got %s", superAdmin.Role)
 	}
 
@@ -82,7 +87,7 @@ func TestDefineWithOverrides(t *testing.T) {
 
 func TestFactoryBuildList(t *testing.T) {
 	adminFactory := gofab.Define[IntegratedTestUser](func(u *IntegratedTestUser) {
-		u.Role = "admin"
+		u.Role = roleAdmin
 		u.Active = true
 	})
 
@@ -101,7 +106,7 @@ func TestFactoryBuildList(t *testing.T) {
 		ids[admin.ID] = true
 
 		// Check that each admin has the factory defaults
-		if admin.Role != "admin" {
+		if admin.Role != roleAdmin {
 			t.Errorf("Admin %d should have role 'admin', got %s", i, admin.Role)
 		}
 		if !admin.Active {
@@ -117,7 +122,7 @@ func TestFactoryBuildList(t *testing.T) {
 
 func TestFactoryBuildListWithCustomizer(t *testing.T) {
 	userFactory := gofab.Define[IntegratedTestUser](func(u *IntegratedTestUser) {
-		u.Role = "user"
+		u.Role = roleUser
 	})
 
 	users := userFactory.BuildList(2, func(u *IntegratedTestUser) {
@@ -131,7 +136,7 @@ func TestFactoryBuildListWithCustomizer(t *testing.T) {
 
 	for i, user := range users {
 		// Check factory defaults
-		if user.Role != "user" {
+		if user.Role != roleUser {
 			t.Errorf("User %d should have role 'user', got %s", i, user.Role)
 		}
 
@@ -149,4 +154,3 @@ func TestFactoryBuildListWithCustomizer(t *testing.T) {
 		}
 	}
 }
-

@@ -9,15 +9,12 @@ func Define[T any](defaults ...Builder[T]) *Factory[T] {
 func (f *Factory[T]) Build(builders ...Builder[T]) T {
 	var result T
 
-	// Apply automatic field population based on struct tags
 	autoPopulateFromTags(&result)
 
-	// Apply factory defaults
 	for _, builder := range f.defaults {
 		builder(&result)
 	}
 
-	// Apply provided builders (override defaults)
 	for _, builder := range builders {
 		builder(&result)
 	}
@@ -31,5 +28,6 @@ func (f *Factory[T]) BuildList(count int, builders ...Builder[T]) []T {
 	for i := range result {
 		result[i] = f.Build(builders...)
 	}
+
 	return result
 }
