@@ -17,26 +17,27 @@ type Product struct {
 
 func ExampleSequence() {
 	// Define a factory with sequential values
-	productFactory := gofab.Define[Product]().
-		Default(gofab.Sequence(
+	productFactory := gofab.Define[Product](
+		gofab.Sequence(
 			func(p *Product, id int64) { p.ID = id },
 			func(n int64) int64 { return n + 1000 }, // Start from 1000
-		)).
-		Default(gofab.Sequence(
+		),
+		gofab.Sequence(
 			func(p *Product, sku string) { p.SKU = sku },
 			func(n int64) string { return fmt.Sprintf("PROD-%04d", n) }, // PROD-0000, PROD-0001, ...
-		)).
-		Default(gofab.Sequence(
+		),
+		gofab.Sequence(
 			func(p *Product, name string) { p.Name = name },
 			func(n int64) string { return fmt.Sprintf("Product %d", n) },
-		)).
-		Default(gofab.Sequence(
+		),
+		gofab.Sequence(
 			func(p *Product, price int) { p.Price = price },
 			func(n int64) int { return int(1000 + n*100) }, // 1000, 1100, 1200, ...
-		)).
-		Default(func(p *Product) {
+		),
+		func(p *Product) {
 			p.CreatedAt = time.Now()
-		})
+		},
+	)
 
 	// Create multiple products
 	products := make([]Product, 3)
