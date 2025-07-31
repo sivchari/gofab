@@ -79,6 +79,7 @@ func handleTagGeneration(tag string, fieldType reflect.Type) any {
 
 func handleSentenceTag(parts []string) any {
 	count := 5
+
 	if len(parts) == 2 {
 		if c, err := strconv.Atoi(parts[1]); err == nil && c > 0 {
 			count = c
@@ -119,13 +120,14 @@ func generateSequence(fieldType reflect.Type) any {
 
 	next := counter.next()
 
-	switch fieldType.Kind() {
+	switch fieldType.Kind() { //nolint:exhaustive // exhaustive switch is not necessary here
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return int(next)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		if next < 0 {
 			return uint(0)
 		}
+
 		return uint(next)
 	case reflect.String:
 		return strconv.FormatInt(next, 10)
