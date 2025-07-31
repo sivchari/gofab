@@ -34,24 +34,31 @@ func validatePopulatedFields(t *testing.T, user *TestUser) {
 	if user.ID == 0 {
 		t.Error("ID should be populated by sequence")
 	}
+
 	if user.Name == "" {
 		t.Error("Name should be populated")
 	}
+
 	if user.Email == "" {
 		t.Error("Email should be populated")
 	}
+
 	if user.Phone == "" {
 		t.Error("Phone should be populated")
 	}
+
 	if user.Company == "" {
 		t.Error("Company should be populated")
 	}
+
 	if user.Address == "" {
 		t.Error("Address should be populated")
 	}
+
 	if user.Age == 0 {
 		t.Error("Age should be populated with range")
 	}
+
 	if user.Bio == "" {
 		t.Error("Bio should be populated with sentence")
 	}
@@ -91,6 +98,7 @@ func TestBuildWithCustomizer(t *testing.T) {
 	if user.NoTag != "Custom Value" {
 		t.Errorf("NoTag should be customized, got %s", user.NoTag)
 	}
+
 	if user.Name != "Override Name" {
 		t.Errorf("Name should be overridden, got %s", user.Name)
 	}
@@ -114,6 +122,7 @@ func TestBuildList(t *testing.T) {
 		if ids[user.ID] {
 			t.Errorf("Duplicate ID found: %d", user.ID)
 		}
+
 		ids[user.ID] = true
 
 		// Check that each user has populated fields
@@ -136,6 +145,7 @@ func TestBuildListWithCustomizer(t *testing.T) {
 		if user.NoTag != "All Same" {
 			t.Errorf("User %d should have customized NoTag", i)
 		}
+
 		if user.Name == "" {
 			t.Errorf("User %d should have auto-generated Name", i)
 		}
@@ -150,6 +160,7 @@ func TestSequenceIncrement(t *testing.T) {
 	if user2.ID != user1.ID+1 {
 		t.Errorf("Expected user2.ID to be %d, got %d", user1.ID+1, user2.ID)
 	}
+
 	if user3.ID != user2.ID+1 {
 		t.Errorf("Expected user3.ID to be %d, got %d", user2.ID+1, user3.ID)
 	}
@@ -169,9 +180,11 @@ func TestInvalidTags(t *testing.T) {
 	if user.BadRange1 < 1 || user.BadRange1 > 100 {
 		t.Errorf("BadRange1 should fallback to 1-100, got %d", user.BadRange1)
 	}
+
 	if user.BadRange2 < 1 || user.BadRange2 > 100 {
 		t.Errorf("BadRange2 should fallback to 1-100, got %d", user.BadRange2)
 	}
+
 	if user.BadRange3 < 1 || user.BadRange3 > 100 {
 		t.Errorf("BadRange3 should fallback to 1-100, got %d", user.BadRange3)
 	}

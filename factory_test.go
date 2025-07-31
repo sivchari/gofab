@@ -33,9 +33,11 @@ func TestDefineWithAutoGeneration(t *testing.T) {
 	if user.ID == 0 {
 		t.Error("ID should be auto-generated")
 	}
+
 	if user.Name == "" {
 		t.Error("Name should be auto-generated")
 	}
+
 	if user.Email == "" {
 		t.Error("Email should be auto-generated")
 	}
@@ -44,6 +46,7 @@ func TestDefineWithAutoGeneration(t *testing.T) {
 	if user.Role != roleUser {
 		t.Errorf("Role should be set by factory default, got %s", user.Role)
 	}
+
 	if !user.Active {
 		t.Error("Active should be set by factory default")
 	}
@@ -70,6 +73,7 @@ func TestDefineWithOverrides(t *testing.T) {
 	if superAdmin.Name != "Super Admin" {
 		t.Errorf("Name should be overridden, got %s", superAdmin.Name)
 	}
+
 	if superAdmin.NoTag != "Special" {
 		t.Errorf("NoTag should be set by override, got %s", superAdmin.NoTag)
 	}
@@ -103,12 +107,14 @@ func TestFactoryBuildList(t *testing.T) {
 		if ids[admin.ID] {
 			t.Errorf("Duplicate ID found: %d", admin.ID)
 		}
+
 		ids[admin.ID] = true
 
 		// Check that each admin has the factory defaults
 		if admin.Role != roleAdmin {
 			t.Errorf("Admin %d should have role 'admin', got %s", i, admin.Role)
 		}
+
 		if !admin.Active {
 			t.Errorf("Admin %d should be active", i)
 		}
@@ -144,6 +150,7 @@ func TestFactoryBuildListWithCustomizer(t *testing.T) {
 		if !user.Active {
 			t.Errorf("User %d should be active from customizer", i)
 		}
+
 		if user.NoTag != "Batch User" {
 			t.Errorf("User %d should have NoTag 'Batch User', got %s", i, user.NoTag)
 		}
