@@ -1,8 +1,5 @@
 GOLANGCI_LINT = go tool -modfile tools/go.mod github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
-# Default fuzz test duration
-FUZZ_TIME ?= 30s
-
 .PHONY: lint
 lint: golangci-lint
 

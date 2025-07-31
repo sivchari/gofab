@@ -14,14 +14,13 @@ type User struct {
 }
 
 func Example() {
-	// Define a factory for User
-	userFactory := gofab.Define[User]().
-		Default(func(u *User) {
-			u.ID = 1
-			u.Name = "John Doe"
-			u.Email = "john@example.com"
-			u.Age = 25
-		})
+	// Define a factory for User with defaults
+	userFactory := gofab.Define[User](func(u *User) {
+		u.ID = 1
+		u.Name = "John Doe"
+		u.Email = "john@example.com"
+		u.Age = 25
+	})
 
 	// Create a user using factory defaults
 	user1 := userFactory.Build()
@@ -34,8 +33,8 @@ func Example() {
 	})
 	fmt.Printf("User2: %+v\n", user2)
 
-	// Create a user without using factory (standalone)
-	user3 := gofab.Create[User](func(u *User) {
+	// Create a user with simple Build API (no factory)
+	user3 := gofab.Build[User](func(u *User) {
 		u.ID = 3
 		u.Name = "Bob Wilson"
 		u.Email = "bob@example.com"

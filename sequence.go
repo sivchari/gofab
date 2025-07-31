@@ -4,12 +4,10 @@ import (
 	"sync/atomic"
 )
 
-// sequenceCounter manages sequential values.
 type sequenceCounter struct {
 	value int64
 }
 
-// next returns the next value in the sequence.
 func (s *sequenceCounter) next() int64 {
 	return atomic.AddInt64(&s.value, 1)
 }
