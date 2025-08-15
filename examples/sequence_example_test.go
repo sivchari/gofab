@@ -1,4 +1,4 @@
-package gofab_test
+package examples_test
 
 import (
 	"fmt"
