@@ -89,7 +89,7 @@ func ExampleFactory_AfterBuild_withList() {
 
 	productFactory := gofab.Define[Product]().
 		AfterBuild(func(p *Product) {
-			p.Tax = p.Price * 0.1      // 10% tax
+			p.Tax = p.Price * 0.1 // 10% tax
 			p.Total = p.Price + p.Tax
 		})
 
