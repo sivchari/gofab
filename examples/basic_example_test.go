@@ -6,7 +6,7 @@ import (
 	"github.com/sivchari/gofab"
 )
 
-type User struct {
+type BasicUser struct {
 	ID    int
 	Name  string
 	Email string
@@ -15,7 +15,7 @@ type User struct {
 
 func Example() {
 	// Define a factory for User with defaults
-	userFactory := gofab.Define[User](func(u *User) {
+	userFactory := gofab.Define[BasicUser](func(u *BasicUser) {
 		u.ID = 1
 		u.Name = "John Doe"
 		u.Email = "john@example.com"
@@ -27,14 +27,14 @@ func Example() {
 	fmt.Printf("User1: %+v\n", user1)
 
 	// Create a user with factory defaults and custom overrides
-	user2 := userFactory.Build(func(u *User) {
+	user2 := userFactory.Build(func(u *BasicUser) {
 		u.Name = "Jane Smith"
 		u.Age = 30
 	})
 	fmt.Printf("User2: %+v\n", user2)
 
 	// Create a user with simple Build API (no factory)
-	user3 := gofab.Build[User](func(u *User) {
+	user3 := gofab.Build[BasicUser](func(u *BasicUser) {
 		u.ID = 3
 		u.Name = "Bob Wilson"
 		u.Email = "bob@example.com"

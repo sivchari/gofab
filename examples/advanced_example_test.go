@@ -80,55 +80,7 @@ func ExampleFactory_combined() {
 // ExampleFactory_testScenarios demonstrates using factory patterns
 // for different test scenarios.
 func ExampleFactory_testScenarios() {
-	type User struct {
-		ID            int
-		Email         string
-		Username      string
-		Role          string
-		IsActive      bool
-		EmailVerified bool
-		LoginCount    int
-		LastLogin     time.Time
-	}
-
-	// Create a comprehensive user factory for testing
-	userFactory := gofab.Define[User]().
-		// Define common user types as traits
-		Trait("newUser", func(u *User) {
-			u.IsActive = true
-			u.EmailVerified = false
-			u.LoginCount = 0
-			u.Role = "user"
-		}).
-		Trait("activeUser", func(u *User) {
-			u.IsActive = true
-			u.EmailVerified = true
-			u.LoginCount = 10
-			u.Role = "user"
-			u.LastLogin = time.Now().Add(-1 * time.Hour)
-		}).
-		Trait("admin", func(u *User) {
-			u.Role = "admin"
-			u.IsActive = true
-			u.EmailVerified = true
-		}).
-		Trait("banned", func(u *User) {
-			u.IsActive = false
-		}).
-		// AfterBuild to ensure data consistency
-		AfterBuild(func(u *User) {
-			// Generate username from email if not set
-			if u.Username == "" && u.Email != "" {
-				parts := strings.Split(u.Email, "@")
-				u.Username = parts[0]
-			}
-		}).
-		AfterBuild(func(u *User) {
-			// Banned users should have verified email reset
-			if !u.IsActive && u.Role != "admin" {
-				u.EmailVerified = false
-			}
-		})
+	userFactory := createUserTestFactory()
 
 	// Test scenario 1: New user registration
 	newUser := userFactory.Build(
@@ -173,4 +125,56 @@ func ExampleFactory_testScenarios() {
 	//   Role: admin, Active: true, Verified: true
 	// Scenario 3 - Banned User:
 	//   Active: false, Verified: false (reset by AfterBuild)
+}
+
+type User struct {
+	ID            int
+	Email         string
+	Username      string
+	Role          string
+	IsActive      bool
+	EmailVerified bool
+	LoginCount    int
+	LastLogin     time.Time
+}
+
+func createUserTestFactory() *gofab.Factory[User] {
+	// Create a comprehensive user factory for testing
+	return gofab.Define[User]().
+		// Define common user types as traits
+		Trait("newUser", func(u *User) {
+			u.IsActive = true
+			u.EmailVerified = false
+			u.LoginCount = 0
+			u.Role = "user"
+		}).
+		Trait("activeUser", func(u *User) {
+			u.IsActive = true
+			u.EmailVerified = true
+			u.LoginCount = 10
+			u.Role = "user"
+			u.LastLogin = time.Now().Add(-1 * time.Hour)
+		}).
+		Trait("admin", func(u *User) {
+			u.Role = "admin"
+			u.IsActive = true
+			u.EmailVerified = true
+		}).
+		Trait("banned", func(u *User) {
+			u.IsActive = false
+		}).
+		// AfterBuild to ensure data consistency
+		AfterBuild(func(u *User) {
+			// Generate username from email if not set
+			if u.Username == "" && u.Email != "" {
+				parts := strings.Split(u.Email, "@")
+				u.Username = parts[0]
+			}
+		}).
+		AfterBuild(func(u *User) {
+			// Banned users should have verified email reset
+			if !u.IsActive && u.Role != "admin" {
+				u.EmailVerified = false
+			}
+		})
 }

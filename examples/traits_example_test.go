@@ -7,6 +7,11 @@ import (
 	"github.com/sivchari/gofab"
 )
 
+const (
+	adminRole     = "admin"
+	moderatorRole = "moderator"
+)
+
 // ExampleFactory_Trait demonstrates defining and using traits
 // for reusable attribute sets.
 func ExampleFactory_Trait() {
@@ -20,12 +25,12 @@ func ExampleFactory_Trait() {
 	// Define a factory with named traits
 	userFactory := gofab.Define[User]().
 		Trait("admin", func(u *User) {
-			u.Role = "admin"
+			u.Role = adminRole
 			u.Permissions = []string{"read", "write", "delete"}
 			u.Active = true
 		}).
 		Trait("moderator", func(u *User) {
-			u.Role = "moderator"
+			u.Role = moderatorRole
 			u.Permissions = []string{"read", "write"}
 			u.Active = true
 		}).
@@ -55,16 +60,16 @@ func ExampleFactory_Trait() {
 // ExampleFactory_WithTraits demonstrates combining multiple traits.
 func ExampleFactory_WithTraits() {
 	type User struct {
-		Name      string
-		Role      string
-		Active    bool
-		Verified  bool
-		Premium   bool
+		Name     string
+		Role     string
+		Active   bool
+		Verified bool
+		Premium  bool
 	}
 
 	userFactory := gofab.Define[User]().
 		Trait("admin", func(u *User) {
-			u.Role = "admin"
+			u.Role = adminRole
 			u.Active = true
 		}).
 		Trait("verified", func(u *User) {
@@ -130,9 +135,9 @@ func ExampleFactory_Trait_override() {
 
 	account := accountFactory.Build(builders...)
 
-	fmt.Println("Type:", account.Type)       // Keeps premium type
-	fmt.Println("Active:", account.Active)   // Overridden by suspended
-	fmt.Println("Limit:", account.Limit)     // Overridden by suspended
+	fmt.Println("Type:", account.Type)     // Keeps premium type
+	fmt.Println("Active:", account.Active) // Overridden by suspended
+	fmt.Println("Limit:", account.Limit)   // Overridden by suspended
 
 	// Output:
 	// Type: premium
