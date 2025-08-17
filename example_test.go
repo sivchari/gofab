@@ -50,13 +50,15 @@ func Example_buildList() {
 		Done  bool
 	}
 
+	const taskTitle = "Task"
+
 	tasks := BuildList[Task](3, func(t *Task) {
-		t.Title = "Task"
+		t.Title = taskTitle
 		t.Done = false
 	})
 
 	fmt.Printf("Created %d tasks\n", len(tasks))
-	fmt.Printf("All have title: %v\n", tasks[0].Title == "Task" && tasks[1].Title == "Task")
+	fmt.Printf("All have title: %v\n", tasks[0].Title == taskTitle && tasks[1].Title == taskTitle)
 
 	// Output:
 	// Created 3 tasks
