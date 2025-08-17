@@ -6,7 +6,6 @@ type Builder[T any] func(*T)
 
 // Factory holds factory definition for a specific type.
 type Factory[T any] struct {
-	defaults   []Builder[T]
-	afterBuild []Builder[T]
-	traits     map[string][]Builder[T]
+	defaults []Builder[T]
+	traits   map[string][]Builder[T]
 }
