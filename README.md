@@ -122,79 +122,40 @@ Define named sets of attributes that can be reused:
 
 ```go
 type User struct {
-    ID          int      `gofab:"sequence"`
-    Name        string   `gofab:"name"`
-    Email       string   `gofab:"email"`
-    Role        string
-    Permissions []string
-    Active      bool
+    Email  string
+    Role   string
+    Active bool
 }
 
 userFactory := gofab.Define[User]().
     Trait("admin", func(u *User) {
         u.Role = "admin"
-        u.Permissions = []string{"read", "write", "delete"}
         u.Active = true
     }).
-    Trait("inactive", func(u *User) {
+    Trait("suspended", func(u *User) {
         u.Active = false
     })
 
 // Use single trait
-admin := userFactory.Build(userFactory.WithTrait("admin")...)
-
-// Combine multiple traits
-inactiveAdmin := userFactory.Build(
-    userFactory.WithTraits("admin", "inactive")...
+admin := userFactory.Build(
+    append(userFactory.WithTrait("admin"),
+        func(u *User) {
+            u.Email = "alice@company.com"
+        })...
 )
 
-// Traits with custom overrides
-customAdmin := userFactory.Build(append(
-    userFactory.WithTrait("admin"),
-    func(u *User) {
-        u.Name = "Super Admin"
-    },
-)...)
+// Combine multiple traits
+suspendedAdmin := userFactory.Build(
+    userFactory.WithTraits("admin", "suspended")...
+)
 ```
 
-### AfterBuild Callbacks
+## Examples
 
-Use AfterBuild to automatically process instances after building:
-
-```go
-type BlogPost struct {
-    Title     string `gofab:"sentence:3"`
-    Body      string `gofab:"sentence:10"`
-    Slug      string // Generated in AfterBuild
-    WordCount int    // Calculated in AfterBuild
-}
-
-postFactory := gofab.Define[BlogPost]().
-    AfterBuild(func(p *BlogPost) {
-        // Generate slug from title
-        p.Slug = strings.ToLower(strings.ReplaceAll(p.Title, " ", "-"))
-    }).
-    AfterBuild(func(p *BlogPost) {
-        // Calculate word count
-        p.WordCount = len(strings.Fields(p.Body))
-    })
-
-// AfterBuild callbacks run automatically
-post := postFactory.Build()
-// post.Slug and post.WordCount are automatically set
-```
-
-Multiple callbacks are executed in order:
-
-```go
-factory := gofab.Define[User]().
-    AfterBuild(func(u *User) {
-        u.Username = strings.ToLower(u.Name)
-    }).
-    AfterBuild(func(u *User) {
-        u.Email = fmt.Sprintf("%s@example.com", u.Username)
-    })
-```
+See `example_test.go` for practical examples including:
+- Basic usage with auto-generated data
+- Using traits for test scenarios
+- E-commerce product testing with discounts
 
 ## License
 

@@ -8,13 +8,6 @@ func Define[T any](defaults ...Builder[T]) *Factory[T] {
 	}
 }
 
-// AfterBuild adds a callback that runs after building each instance.
-func (f *Factory[T]) AfterBuild(callback Builder[T]) *Factory[T] {
-	f.afterBuild = append(f.afterBuild, callback)
-
-	return f
-}
-
 // Trait defines a named set of attributes that can be applied when building.
 func (f *Factory[T]) Trait(name string, builders ...Builder[T]) *Factory[T] {
 	f.traits[name] = builders
@@ -49,10 +42,6 @@ func (f *Factory[T]) Build(builders ...Builder[T]) T {
 
 	for _, builder := range builders {
 		builder(&result)
-	}
-
-	for _, callback := range f.afterBuild {
-		callback(&result)
 	}
 
 	return result
