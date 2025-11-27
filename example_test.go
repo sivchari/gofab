@@ -167,3 +167,47 @@ func Example_sequence() {
 	// Output:
 	// IDs are sequential: true
 }
+
+// Example_association demonstrates creating objects with associations.
+func Example_association() {
+	type Author struct {
+		ID   int    `gofab:"sequence"`
+		Name string `gofab:"name"`
+	}
+
+	type Post struct {
+		ID       int    `gofab:"sequence"`
+		Title    string `gofab:"sentence:3"`
+		AuthorID int
+	}
+
+	type PostRelations struct {
+		Author Author
+	}
+
+	authorFactory := Define[Author]()
+
+	postFactory := DefineWithAssociations[Post, PostRelations](
+		func() PostRelations {
+			return PostRelations{
+				Author: authorFactory.Build(),
+			}
+		},
+		func(p *Post, r PostRelations) {
+			p.AuthorID = r.Author.ID
+		},
+	)
+
+	post, relations := postFactory.BuildWithAssociations()
+
+	fmt.Printf("Post has ID: %v\n", post.ID > 0)
+	fmt.Printf("Post has Title: %v\n", post.Title != "")
+	fmt.Printf("Post linked to Author: %v\n", post.AuthorID == relations.Author.ID)
+	fmt.Printf("Author has Name: %v\n", relations.Author.Name != "")
+
+	// Output:
+	// Post has ID: true
+	// Post has Title: true
+	// Post linked to Author: true
+	// Author has Name: true
+}
