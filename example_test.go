@@ -167,3 +167,70 @@ func Example_sequence() {
 	// Output:
 	// IDs are sequential: true
 }
+
+// Example_sequenceWithStartValue demonstrates sequence with custom start value.
+func Example_sequenceWithStartValue() {
+	type Invoice struct {
+		Number int `gofab:"sequence:1000"`
+	}
+
+	ResetAllSequences()
+
+	invoice := Build[Invoice]()
+	fmt.Printf("Invoice number starts at 1000: %v\n", invoice.Number >= 1000)
+
+	// Output:
+	// Invoice number starts at 1000: true
+}
+
+// Example_resetSequence demonstrates resetting sequences between tests.
+func Example_resetSequence() {
+	type Item struct {
+		ID int `gofab:"sequence"`
+	}
+
+	ResetAllSequences()
+
+	item1 := Build[Item]()
+	item2 := Build[Item]()
+
+	fmt.Printf("First item ID: %d\n", item1.ID)
+	fmt.Printf("Second item ID: %d\n", item2.ID)
+
+	// Reset and build again
+	ResetAllSequences()
+
+	item3 := Build[Item]()
+	fmt.Printf("After reset, item ID: %d\n", item3.ID)
+
+	// Output:
+	// First item ID: 1
+	// Second item ID: 2
+	// After reset, item ID: 1
+}
+
+// Example_newTags demonstrates the new populate tags.
+func Example_newTags() {
+	type Profile struct {
+		UUID     string `gofab:"uuid"`
+		Username string `gofab:"username"`
+		Website  string `gofab:"url"`
+		Active   bool   `gofab:"bool:true"`
+		Status   string `gofab:"oneof:active,pending,inactive"`
+	}
+
+	profile := Build[Profile]()
+
+	fmt.Printf("Has UUID: %v\n", profile.UUID != "")
+	fmt.Printf("Has Username: %v\n", profile.Username != "")
+	fmt.Printf("Has Website: %v\n", profile.Website != "")
+	fmt.Printf("Is Active: %v\n", profile.Active)
+	fmt.Printf("Has Valid Status: %v\n", profile.Status == "active" || profile.Status == "pending" || profile.Status == "inactive")
+
+	// Output:
+	// Has UUID: true
+	// Has Username: true
+	// Has Website: true
+	// Is Active: true
+	// Has Valid Status: true
+}
