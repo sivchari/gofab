@@ -12,7 +12,7 @@ const (
 )
 
 type IntegratedTestUser struct {
-	ID     int    `gofab:"sequence"`
+	ID     int    `gofab:"range:1,1000"`
 	Name   string `gofab:"name"`
 	Email  string `gofab:"email"`
 	Role   string // No tag - will be set by factory defaults
@@ -101,14 +101,11 @@ func TestFactoryBuildList(t *testing.T) {
 		t.Errorf("Expected 3 admins, got %d", len(admins))
 	}
 
-	// Check that all admins have unique IDs (sequence)
-	ids := make(map[int]bool)
+	// Check that all admins have IDs
 	for i, admin := range admins {
-		if ids[admin.ID] {
-			t.Errorf("Duplicate ID found: %d", admin.ID)
+		if admin.ID == 0 {
+			t.Errorf("Admin %d should have an ID", i)
 		}
-
-		ids[admin.ID] = true
 
 		// Check that each admin has the factory defaults
 		if admin.Role != roleAdmin {

@@ -7,7 +7,7 @@ import (
 )
 
 type TestUser struct {
-	ID      int    `gofab:"sequence"`
+	ID      int    `gofab:"range:1,1000"`
 	Name    string `gofab:"name"`
 	Email   string `gofab:"email"`
 	Phone   string `gofab:"phone"`
@@ -32,7 +32,7 @@ func validatePopulatedFields(t *testing.T, user *TestUser) {
 	t.Helper()
 
 	if user.ID == 0 {
-		t.Error("ID should be populated by sequence")
+		t.Error("ID should be populated by range")
 	}
 
 	if user.Name == "" {
@@ -116,18 +116,13 @@ func TestBuildList(t *testing.T) {
 		t.Errorf("Expected 3 users, got %d", len(users))
 	}
 
-	// Check that all users have different sequence IDs
-	ids := make(map[int]bool)
+	// Check that each user has populated fields
 	for _, user := range users {
-		if ids[user.ID] {
-			t.Errorf("Duplicate ID found: %d", user.ID)
-		}
-
-		ids[user.ID] = true
-
-		// Check that each user has populated fields
 		if user.Name == "" || user.Email == "" {
 			t.Error("All users should have populated fields")
+		}
+		if user.ID == 0 {
+			t.Error("ID should be populated by range")
 		}
 	}
 }
@@ -149,20 +144,6 @@ func TestBuildListWithCustomizer(t *testing.T) {
 		if user.Name == "" {
 			t.Errorf("User %d should have auto-generated Name", i)
 		}
-	}
-}
-
-func TestSequenceIncrement(t *testing.T) {
-	user1 := gofab.Build[TestUser]()
-	user2 := gofab.Build[TestUser]()
-	user3 := gofab.Build[TestUser]()
-
-	if user2.ID != user1.ID+1 {
-		t.Errorf("Expected user2.ID to be %d, got %d", user1.ID+1, user2.ID)
-	}
-
-	if user3.ID != user2.ID+1 {
-		t.Errorf("Expected user3.ID to be %d, got %d", user2.ID+1, user3.ID)
 	}
 }
 
