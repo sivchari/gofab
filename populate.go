@@ -70,8 +70,6 @@ func handleTagGeneration(tag string, fieldType reflect.Type) any {
 		return handleSentenceTag(parts)
 	case "range":
 		return handleRangeTag(parts)
-	case "sequence":
-		return generateSequence(fieldType)
 	default:
 		return nil
 	}
@@ -107,39 +105,6 @@ func handleRangeTag(parts []string) any {
 	}
 
 	return gofakeit.Number(1, 100)
-}
-
-var sequenceCounters = make(map[reflect.Type]*sequenceCounter)
-
-func generateSequence(fieldType reflect.Type) any {
-	counter, exists := sequenceCounters[fieldType]
-	if !exists {
-		counter = &sequenceCounter{value: 0}
-		sequenceCounters[fieldType] = counter
-	}
-
-	next := counter.next()
-
-	switch fieldType.Kind() { //nolint:exhaustive // exhaustive switch is not necessary here
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return int(next)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		if next < 0 {
-			return uint(0)
-		}
-
-		return uint(next)
-	case reflect.String:
-		return strconv.FormatInt(next, 10)
-	case reflect.Bool:
-		return next%2 == 0
-	case reflect.Float32:
-		return float32(next)
-	case reflect.Float64:
-		return float64(next)
-	default:
-		return int(next)
-	}
 }
 
 func setFieldValue(field reflect.Value, value any) {

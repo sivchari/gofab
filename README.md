@@ -7,7 +7,8 @@ A simple and flexible factory pattern implementation for Go testing, inspired by
 - Type-safe factory definitions using generics
 - Automatic field population with struct tags
 - Build single or multiple instances
-- Sequence support for unique IDs
+- Sequence builder for unique IDs
+- Traits for reusable attribute sets
 - Customizable field overrides
 - Integration with faker for realistic test data
 
@@ -23,9 +24,9 @@ go get github.com/sivchari/gofab
 
 ```go
 type User struct {
-    ID    int    `gofab:"sequence"`
     Name  string `gofab:"name"`
     Email string `gofab:"email"`
+    Age   int    `gofab:"range:18,65"`
 }
 
 // Build a single user
@@ -74,7 +75,6 @@ admin := userFactory.Build(func(u *User) {
 
 gofab supports various struct tags for automatic field population:
 
-- `gofab:"sequence"` - Auto-incrementing ID
 - `gofab:"name"` - Random person name
 - `gofab:"email"` - Random email address
 - `gofab:"phone"` - Random phone number
@@ -103,17 +103,26 @@ func TestUserService(t *testing.T) {
 }
 ```
 
-### Sequence for Unique IDs
+### Sequence Builder for Unique IDs
+
+Use the `Sequence` builder for auto-incrementing values:
 
 ```go
 type Order struct {
-    ID     int `gofab:"sequence"`
+    ID     int
     Number string
 }
 
-order1 := gofab.Build[Order]() // ID: 1
-order2 := gofab.Build[Order]() // ID: 2
-order3 := gofab.Build[Order]() // ID: 3
+orderFactory := gofab.Define[Order](
+    gofab.Sequence(
+        func(o *Order, n int64) { o.ID = int(n) },
+        func(n int64) int64 { return n + 1 },
+    ),
+)
+
+order1 := orderFactory.Build() // ID: 1
+order2 := orderFactory.Build() // ID: 2
+order3 := orderFactory.Build() // ID: 3
 ```
 
 ### Traits for Reusable Attribute Sets

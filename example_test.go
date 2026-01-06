@@ -7,18 +7,15 @@ import (
 // Example_build demonstrates the basic Build function.
 func Example_build() {
 	type User struct {
-		ID    int    `gofab:"sequence"`
 		Name  string `gofab:"name"`
 		Email string `gofab:"email"`
 	}
 
 	user := Build[User]()
-	fmt.Printf("Has ID: %v\n", user.ID > 0)
 	fmt.Printf("Has Name: %v\n", user.Name != "")
 	fmt.Printf("Has Email: %v\n", user.Email != "")
 
 	// Output:
-	// Has ID: true
 	// Has Name: true
 	// Has Email: true
 }
@@ -148,20 +145,23 @@ func Example_withTraits() {
 	// On Sale: true
 }
 
-// Example_sequence demonstrates the sequence tag for auto-incrementing IDs.
+// Example_sequence demonstrates the Sequence builder for auto-incrementing IDs.
 func Example_sequence() {
 	type Order struct {
-		ID int `gofab:"sequence"`
+		ID int
 	}
+
+	orderFactory := Define[Order](
+		Sequence(func(o *Order, n int64) { o.ID = int(n) }, func(n int64) int64 { return n + 1 }),
+	)
 
 	// Build multiple orders to show sequence
-	orders := make([]Order, 3)
-	for i := range orders {
-		orders[i] = Build[Order]()
-	}
+	order1 := orderFactory.Build()
+	order2 := orderFactory.Build()
+	order3 := orderFactory.Build()
 
 	// Check that IDs are sequential
-	sequential := orders[1].ID > orders[0].ID && orders[2].ID > orders[1].ID
+	sequential := order2.ID > order1.ID && order3.ID > order2.ID
 	fmt.Printf("IDs are sequential: %v\n", sequential)
 
 	// Output:
